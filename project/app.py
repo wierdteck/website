@@ -21,21 +21,22 @@ def register():
 
 @app.route('/auth' , methods=['POST'])
 def auth():
+    print(request.form)
     action = request.form['action']
     username = request.form['username']
     password = request.form['password']
     if(action == 'register'):
         passwordConfirm = request.form['passwordConfirm']
         if(password != passwordConfirm):
-            return "Passwords do not match"
+            return render_template("auth/register.html", error="Passwords do not match")
         
         num_upper = sum(1 for c in password if c.isupper())
         num_num = sum(1 for c in password if c.isdigit())
         num_special = sum(1 for c in password if not c.isalnum())
         if(len(username) < 4):
-            return "Username must be at least 4 characters long"
+            return render_template("auth/register.html", error="Username must be at least 4 characters long")
         if(len(password) < 8):
-            return "Password must be at least 8 characters long"
+            return render_template("auth/register.html", error="Password must be at least 8 characters long")
         # if(num_upper < 1):
         #     return "Password must contain at least one uppercase letter"        
         # if(num_num < 1):
@@ -43,20 +44,21 @@ def auth():
         # if(num_special < 1):
         #     return "Password must contain at least one special character"
         if(username == password):
-            return "Username and password cannot be the same"
+            return render_template("auth/register.html", error="Username and password cannot be the same")
         if(User.query.filter_by(usr=username).first()):
-            return "Username already exists"
+            return render_template("auth/register.html", error="Username already exists")
         new_usr = User(usr=username, pas=password)
         db.session.add(new_usr)
         db.session.commit()
-        render_template('home.html', user=username)
+        return render_template('home.html', user=username)
     elif(action == 'login'):
         if(not User.query.filter_by(usr=username, pas=password).first()):
-            return "Invalid username or password"
+            return render_template('auth/login.html', error="Invalid username or password")
         else:
             return render_template('home.html', user=username)
-    return "Error"
-
+    else: 
+        return "Error: " + action + "," + username + "," + password
+    return "what"
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)
