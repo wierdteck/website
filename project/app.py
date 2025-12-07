@@ -7,7 +7,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 db = SQLAlchemy(app)
 
 class User(db.Model):
-    usr = db.Column(db.String(80), unique=True, nullable=False)
+    usr = db.Column(db.String(80), unique=True, nullable=False, primary_key=True)
     pas = db.Column(db.String(120), nullable=False)
 
 @app.route('/')
@@ -36,12 +36,12 @@ def auth():
             return "Username must be at least 4 characters long"
         if(len(password) < 8):
             return "Password must be at least 8 characters long"
-        if(num_upper < 1):
-            return "Password must contain at least one uppercase letter"        
-        if(num_num < 1):
-            return "Password must contain at least one number"
-        if(num_special < 1):
-            return "Password must contain at least one special character"
+        # if(num_upper < 1):
+        #     return "Password must contain at least one uppercase letter"        
+        # if(num_num < 1):
+        #     return "Password must contain at least one number"
+        # if(num_special < 1):
+        #     return "Password must contain at least one special character"
         if(username == password):
             return "Username and password cannot be the same"
         if(User.query.filter_by(usr=username).first()):
@@ -49,12 +49,12 @@ def auth():
         new_usr = User(usr=username, pas=password)
         db.session.add(new_usr)
         db.session.commit()
-        render_template('home.html', username=username)
+        render_template('home.html', user=username)
     elif(action == 'login'):
         if(not User.query.filter_by(usr=username, pas=password).first()):
             return "Invalid username or password"
         else:
-            return render_template('home.html', username=username)
+            return render_template('home.html', user=username)
     return "Error"
 
 
